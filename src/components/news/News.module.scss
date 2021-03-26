@@ -1,0 +1,32 @@
+.news {
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 1em 1em 0 1em;
+  margin: 0.5em;
+  width: calc(100%/3 - 3em - 6px);
+  background-color: rgb(255, 242, 205);
+
+  &__title {
+    margin:0
+  }
+
+  &__list {
+    list-style-type: none;
+    padding: 0;
+    line-height: 1.5em;
+  }
+
+  &__link {
+    color:#000;
+
+    &__special {
+      text-decoration-line: none;
+      font-weight: 700;
+    }
+  }
+
+  &__not {
+    border: #fff;
+    background-color: #fff;
+  }
+}
