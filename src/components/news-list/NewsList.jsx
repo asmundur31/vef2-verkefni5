@@ -10,15 +10,19 @@ export function NewsList() {
   const [data, setData] = useState(false);
 
   useEffect(() => {
-    const abortController = new AbortController();
+    // Bætum við mounted breytu til að passa uppá að við séum ekki að uppfæra 
+    // state nema við séum með mounted component
+    let mounted = true;
     async function saekjaFlokka() {
-      setLoading(true);
-      setError(null);
+      if (mounted) {
+        setLoading(true);
+        setError(null);
+      } 
 
       let json;
 
       try {
-        const result = await fetch(apiUrl, { signal: abortController.signal });
+        const result = await fetch(apiUrl);
 
         if (!result.ok) {
           throw new Error('result not ok');
@@ -26,21 +30,22 @@ export function NewsList() {
 
         json = await result.json();
       } catch (e) {
-        if (!abortController.signal.aborted) {
+        if (mounted) {
           setError('Gat ekki sótt gögn.');
-        } else {
-          setError('Notandi hætti við fyrirspurn');
-        }
+        }        
+        return;
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-
-      setData(json);
+      if (mounted) {
+        setData(json);
+      }
     }
     saekjaFlokka();
-    return () => {
-      abortController.abort();
-    };
+
+    return () => mounted = false;
   }, []);
 
   if (error) {

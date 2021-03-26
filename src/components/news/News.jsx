@@ -22,15 +22,19 @@ export function News({ id = '', limit = undefined }) {
   // Effect til að sækja fréttir fyrir ákveðin flokk og uppfæra loading, error 
   // og data stöður
   useEffect(() => {
-    const abortController = new AbortController();
+    // Bætum við mounted breytu til að passa uppá að við séum ekki að uppfæra 
+    // state nema við séum með mounted component
+    let mounted = true;
     async function saekjaFrettir() {
-      setLoading(true);
-      setError(null);
+      if (mounted) {
+        setLoading(true);
+        setError(null);
+      } 
 
       let json;
 
       try {
-        const result = await fetch(apiUrl + id, { signal: abortController.signal });
+        const result = await fetch(apiUrl + id);
 
         if (!result.ok) {
           throw new Error('result not ok');
@@ -38,20 +42,22 @@ export function News({ id = '', limit = undefined }) {
 
         json = await result.json();
       } catch (e) {
-        if (!abortController.signal.aborted) {
+        if (mounted) {
           setError('Gat ekki sótt gögn.');
-        } else {
-          setError('Notandi hætti við fyrirspurn');
         }
+        return;
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-      setData(json);
+      if(mounted) {
+        setData(json);
+      }
     }
     saekjaFrettir();
-    return () => {
-      abortController.abort();
-    };
+
+    return () => mounted = false;
   }, [id, limit]);
 
   // Sér effect fyrir stöðuna á linknum 'Til baka' eða 'Allar fréttir'
